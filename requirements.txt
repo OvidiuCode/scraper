@@ -1,0 +1,6 @@
+beautifulsoup4
+peewee_async
+peewee
+aiohttp
+asyncio
+toml

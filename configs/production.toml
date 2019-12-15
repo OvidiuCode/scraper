@@ -1,0 +1,9 @@
+[smtp]
+host = "smtp.gmail.com"
+address = "ovidiutesting1994@gmail.com"
+password = "tyxcy7-vixzid-xetdIw"
+from_name = "uAlert"
+
+[email]
+subject = 'BOOM! Pretul a scazut!'
+message = "Salut! Alerta ta preferata e aici! Pretul pentru produsul {produs} a scazut la {pret} lei. Acceseaza rapid link-ul: {link}."
