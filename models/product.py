@@ -12,8 +12,8 @@ class Product(peewee.Model):
         db_table = 'products'
         database = MODEL_DB
 
+    product_id = peewee.CharField(unique=True, index=True)
     title = peewee.TextField(index=True)
     link = peewee.TextField()
-    product_id = peewee.CharField()
     price = peewee.DecimalField()
     created_at = peewee.DateTimeField(default=datetime.now)

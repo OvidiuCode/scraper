@@ -1,10 +1,13 @@
-import peewee_async
+import peewee
+
+from helper import Helper
+
+config = Helper.get_config()['database']
 
 # Define async database
-MODEL_DB = peewee_async.PostgresqlDatabase(
-    'licenta', host='localhost', user='ovidiu', password='Rnjnr1PJpMPK0XG!R$ZB#SAa'
+MODEL_DB = peewee.PostgresqlDatabase(
+    config['name'],
+    host=config['host'],
+    user=config['user'],
+    password=config['password'],
 )
-MODEL_DB.set_allow_sync(False)
-
-# Create async models manager
-OBJ_MANAGER = peewee_async.Manager(MODEL_DB)

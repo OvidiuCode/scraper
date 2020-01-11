@@ -6,22 +6,22 @@ from email.utils import formataddr
 
 from models.alert import Alert
 from models.product import Product
-from models.database import OBJ_MANAGER
 
-from . import smtp_client, config
+from helper import Helper
 
 
-class AlertDispatcher:
+class AlertDispatcher(Helper):
     ALERT_DAYS_DELTA = 365
 
     async def work(self):
         alert_delta = datetime.now() - timedelta(days=self.ALERT_DAYS_DELTA)
-        alerts = await OBJ_MANAGER.execute(
+        alerts = (
             Alert.select(
+                Alert.id,
                 Alert.email,
                 Product.title.alias('product_title'),
-                Product.link.aliast('product_link'),
-                Product.price.aliast('product_price'),
+                Product.link.alias('product_link'),
+                Product.price.alias('product_price'),
             )
             .join(Product)
             .where(
@@ -29,20 +29,23 @@ class AlertDispatcher:
                 Alert.created_at > alert_delta,
                 ~Alert.satisfied,
             )
-            .naive()
+            .distinct(Product.product_id)
+            .objects()
         )
 
-        for alert in alerts:
-            await self.process_alert(alert)
+        alert_ids = []
+        with self.smtp_client() as smtp_client:
+            for alert in alerts:
+                alert_ids.append(alert.id)
+                await self.process_alert(alert, smtp_client)
 
-        await OBJ_MANAGER.execute(
-            Alert.update(satisfied=True).where(Alert.id.in_(alerts))
-        )
+        if alert_ids:
+            Alert.update(satisfied=True).where(Alert.id.in_(alert_ids))
 
-    @staticmethod
-    async def process_alert(alert):
+    async def process_alert(self, alert, smtp_client):
         msg = MIMEMultipart()
 
+        config = self.get_config()
         message = config['email']['message'].format(
             produs=alert.product_title,
             pret=alert.product_price,
@@ -50,7 +53,7 @@ class AlertDispatcher:
         )
 
         from_addr = str(Header(config['smtp']['from_name'], 'utf-8'))
-        msg['From'] = formataddr(from_addr, config['smtp']['address'])
+        msg['From'] = formataddr((from_addr, config['smtp']['address']))
         msg['To'] = alert.email
         msg['Subject'] = config['email']['subject']
 

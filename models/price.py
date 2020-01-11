@@ -16,4 +16,6 @@ class Price(peewee.Model):
     price = peewee.DecimalField()
     created_at = peewee.DateTimeField(default=datetime.now)
 
-    product = peewee.ForeignKeyField(Product, related_name='prices')
+    product = peewee.ForeignKeyField(
+        Product, to_field='product_id', related_name='prices', on_delete='CASCADE'
+    )

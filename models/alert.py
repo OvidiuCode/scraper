@@ -19,4 +19,6 @@ class Alert(peewee.Model):
     satisfied = peewee.BooleanField(default=False, index=True)
     created_at = peewee.DateTimeField(default=datetime.now)
 
-    product = peewee.ForeignKeyField(Product, related_name='alerts')
+    product = peewee.ForeignKeyField(
+        Product, related_name='alerts', on_delete='CASCADE',
+    )

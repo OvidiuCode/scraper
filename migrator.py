@@ -3,10 +3,8 @@ import sys
 from models.product import Product
 from models.alert import Alert
 from models.price import Price
-from models.database import MODEL_DB
 
 all_models = [Product, Alert, Price]
-MODEL_DB.set_allow_sync(True)
 
 
 def up():
@@ -17,7 +15,7 @@ def up():
 
 
 def down():
-    for model in all_models:
+    for model in all_models[::-1]:
         if model.table_exists():
             model.drop_table()
 

@@ -1,6 +1,11 @@
 beautifulsoup4
-peewee_async
 peewee
 aiohttp
 asyncio
 toml
+fastapi
+uvicorn
+pydantic
+aiopg
+requests
+smtplib
