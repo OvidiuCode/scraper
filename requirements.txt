@@ -9,3 +9,4 @@ pydantic
 aiopg
 requests
 smtplib
+python-multipart

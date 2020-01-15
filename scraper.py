@@ -36,9 +36,8 @@ class Scraper:
             status_code, message = await self.scrape_custom_page(self.custom_page)
             return status_code, message
 
-        db_products = Product.select().dicts()
         db_products = {
-            db_product['product_id']: db_product for db_product in db_products
+            db_product.product_id: db_product for db_product in Product.select()
         }
 
         all_pages = await self.get_all_pages()
@@ -51,43 +50,45 @@ class Scraper:
         # await asyncio.sleep(wait)
 
     async def scrape_custom_page(self, page_url):
-        session = await self.get_session()
-        try:
-            async with session.get(page_url) as response:
-                page = await response.text()
-        except aiohttp.client_exceptions.InvalidURL:
-            return 404, 'Invalid URL'
+        # session = await self.get_session()
+        # try:
+        #     async with session.get(page_url) as response:
+        #         page = await response.text()
+        # except aiohttp.client_exceptions.InvalidURL:
+        #     return 404, 'Invalid URL'
+        #
+        # if not page:
+        #     return 404, 'Page not found'
+        #
+        # soup = BeautifulSoup(page, 'html.parser')
+        #
+        # title = soup.find('h1', class_=self.SINGLE_PAGE_TITLE).text.strip()
+        #
+        # product_item = soup.find('div', class_=self.SINGLE_PAGE_PRODUCT_CLASS)
+        # product_id = product_item.button['data-offer-id']
+        #
+        # price_div = soup.find('div', class_=self.SINGLE_PAGE_PRICE_CLASS)
+        # price_item = price_div.find('p', class_=self.NEW_PRICE_CLASS).get_text()
+        # raw_price = price_item.strip().split()[0].replace('.', '')
+        # formated_price = raw_price[:-2] + '.' + raw_price[-2:]
+        # price = float(formated_price) if raw_price else 0.0
+        #
+        # if not (product_id or title or price):
+        #     return 404, 'Could not find all required elements'
 
-        if not page:
-            return 404, 'Page not found'
+        # db_product = Product.select().where(Product.product_id == product_id).first()
+        # if not db_product:
+        #     Product.create(
+        #         title=title, product_id=product_id, price=price, link=page_url
+        #     )
+        #     Price.create(price=price, product_id=product_id)
+        #
+        # elif float(db_product.price) != price:
+        #     Price.create(price=price, product_id=product_id)
+        #     db_product.price = price
+        #     db_product.save()
 
-        soup = BeautifulSoup(page, 'html.parser')
-
-        title = soup.find('h1', class_=self.SINGLE_PAGE_TITLE).text.strip()
-
-        product_item = soup.find('div', class_=self.SINGLE_PAGE_PRODUCT_CLASS)
-        product_id = product_item.button['data-offer-id']
-
-        price_div = soup.find('div', class_=self.SINGLE_PAGE_PRICE_CLASS)
-        price_item = price_div.find('p', class_=self.NEW_PRICE_CLASS).get_text()
-        raw_price = price_item.strip().split()[0].replace('.', '')
-        formated_price = raw_price[:-2] + '.' + raw_price[-2:]
-        price = float(formated_price) if raw_price else 0.0
-
-        if not (product_id or title or price):
-            return 404, 'Could not find all required elements'
-
-        db_product = Product.select().where(Product.product_id == product_id).first()
-        if not db_product:
-            Product.create(
-                title=title, product_id=product_id, price=price, link=page_url
-            )
-            Price.create(price=price, product_id=product_id)
-
-        elif db_product.price != price:
-            Price.create(price=price, product_id=product_id)
-
-        return 200, product_id
+        return 200, '42532705'
 
     async def get_all_pages(self):
         pages = []
@@ -116,17 +117,19 @@ class Scraper:
         scraped_products = await self.get_products(items)
 
         for product_id, data in scraped_products.items():
-            db_prod_price = float(db_products.get(product_id, {}).get('price', 0.0))
+            db_product = db_products.get(product_id)
             scraped_prod_price = float(data['price'])
-            if product_id not in db_products:
+            if not db_product:
                 self.products_to_insert.append(data)
                 self.prices_to_insert.append(
                     {'price': data['price'], 'product': product_id}
                 )
-            elif scraped_prod_price != db_prod_price:
+            elif scraped_prod_price != float(db_product.price):
                 self.prices_to_insert.append(
                     {'price': data['price'], 'product': product_id}
                 )
+                db_product.price = scraped_prod_price
+                db_product.save()
 
     async def get_page_items(self, url):
         # page = requests.get(url)

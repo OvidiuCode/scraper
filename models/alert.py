@@ -20,5 +20,5 @@ class Alert(peewee.Model):
     created_at = peewee.DateTimeField(default=datetime.now)
 
     product = peewee.ForeignKeyField(
-        Product, related_name='alerts', on_delete='CASCADE',
+        Product, to_field='product_id', related_name='alerts', on_delete='CASCADE',
     )
