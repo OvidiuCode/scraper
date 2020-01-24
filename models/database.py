@@ -10,4 +10,5 @@ MODEL_DB = peewee.PostgresqlDatabase(
     host=config['host'],
     user=config['user'],
     password=config['password'],
+    autorollback=True,
 )

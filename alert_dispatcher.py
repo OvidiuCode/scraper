@@ -40,7 +40,7 @@ class AlertDispatcher(Helper):
                 await self.process_alert(alert, smtp_client)
 
         if alert_ids:
-            Alert.update(satisfied=True).where(Alert.id.in_(alert_ids))
+            Alert.update(satisfied=True).where(Alert.id.in_(alert_ids)).execute()
 
     async def process_alert(self, alert, smtp_client):
         msg = MIMEMultipart()
@@ -48,7 +48,7 @@ class AlertDispatcher(Helper):
         config = self.get_config()
         message = config['email']['message'].format(
             produs=alert.product_title,
-            pret=alert.product_price,
+            pret=float(alert.product_price),
             link=alert.product_link,
         )
 
