@@ -7,6 +7,6 @@ fastapi
 uvicorn
 pydantic
 aiopg
+uvloop
 requests
-smtplib
 python-multipart

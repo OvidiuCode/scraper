@@ -9,7 +9,7 @@ from models.price import Price
 class Scraper:
 
     BASE_URL = 'https://www.emag.ro/'
-    ITEMS = ['laptopuri', 'telefoane-mobile']
+    ITEMS = ['laptopuri', 'telefoane-mobile', 'smartwatch', 'tablete', 'televizoare']
 
     ITEM_CLASS = 'card-section-wrapper js-section-wrapper'
     BUTTON_CLASS = 'btn btn-sm btn-primary btn-emag yeahIWantThisProduct'
@@ -105,6 +105,8 @@ class Scraper:
                 max([item.text for item in next_pages if item.text.isdigit()])
             )
 
+            # Add the current page
+            pages.append(self.BASE_URL + item + '/c')
             for number in range(2, max_page_number + 1):
                 temp_url = self.BASE_URL + item + '/p' + str(number) + '/c'
                 pages.append(temp_url)
@@ -183,8 +185,10 @@ class Scraper:
             for n, i in enumerate(self.prices_to_insert)
             if i not in self.prices_to_insert[n + 1 :]
         ]
-        Product.insert_many(products).execute()
-        Price.insert_many(prices).execute()
+
+        with Product._meta.database.atomic():
+            Product.insert_many(products).execute()
+            Price.insert_many(prices).execute()
 
         self.products_to_insert = []
         self.prices_to_insert = []

@@ -55,13 +55,13 @@ async def search_product(link: str):
 async def get_best_deals():
     best_deals = MODEL_DB.execute_sql(
         """
-        SELECT prd.id , prd.product_id , prd.title , prd.link , prd.price , prd.created_at,
-          (SELECT second_min.price - prd.price
+        SELECT prd.title , prd.link , prd.price, 
+          (SELECT ((second_min.price - prd.price) / prd.price * 100)
            FROM
              (SELECT prc2.price
               FROM prices AS prc2
               WHERE prc2.product_id = prd.product_id
-              ORDER BY prc2.price DESC
+              ORDER BY prc2.created_at DESC
               OFFSET 1 LIMIT 1) AS second_min) AS price_diff
         FROM products AS prd
         INNER JOIN prices AS prc ON (prc.product_id = prd.product_id)
@@ -76,9 +76,9 @@ async def get_best_deals():
     for deal in best_deals:
         products.append(
             {
-                'title': html.unescape(deal[2].split(',')[0]),
-                'link': deal[3],
-                'price': float(deal[4]),
+                'title': html.unescape(deal[0].split(',')[0]),
+                'link': deal[1],
+                'discount': f"{deal[3]:.2f}",
             }
         )
 

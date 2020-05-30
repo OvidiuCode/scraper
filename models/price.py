@@ -13,7 +13,7 @@ class Price(peewee.Model):
         db_table = 'prices'
         database = MODEL_DB
 
-    price = peewee.DecimalField()
+    price = peewee.DecimalField(decimal_places=3)
     created_at = peewee.DateTimeField(default=datetime.now)
 
     product = peewee.ForeignKeyField(
