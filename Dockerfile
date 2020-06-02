@@ -7,3 +7,4 @@ RUN pip install -r requirements.txt
 COPY . /app
 
 CMD ["uvicorn", "app:app"]
+EXPOSE 8000
