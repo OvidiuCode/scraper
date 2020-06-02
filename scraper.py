@@ -50,45 +50,50 @@ class Scraper:
         # await asyncio.sleep(wait)
 
     async def scrape_custom_page(self, page_url):
-        # session = await self.get_session()
-        # try:
-        #     async with session.get(page_url) as response:
-        #         page = await response.text()
-        # except aiohttp.client_exceptions.InvalidURL:
-        #     return 404, 'Invalid URL'
-        #
-        # if not page:
-        #     return 404, 'Page not found'
-        #
-        # soup = BeautifulSoup(page, 'html.parser')
-        #
-        # title = soup.find('h1', class_=self.SINGLE_PAGE_TITLE).text.strip()
-        #
-        # product_item = soup.find('div', class_=self.SINGLE_PAGE_PRODUCT_CLASS)
-        # product_id = product_item.button['data-offer-id']
-        #
-        # price_div = soup.find('div', class_=self.SINGLE_PAGE_PRICE_CLASS)
-        # price_item = price_div.find('p', class_=self.NEW_PRICE_CLASS).get_text()
-        # raw_price = price_item.strip().split()[0].replace('.', '')
-        # formated_price = raw_price[:-2] + '.' + raw_price[-2:]
-        # price = float(formated_price) if raw_price else 0.0
-        #
-        # if not (product_id or title or price):
-        #     return 404, 'Could not find all required elements'
+        session = await self.get_session()
+        try:
+            async with session.get(page_url) as response:
+                if response.status == 404:
+                    return 404, 'Invalid URL'
+                page = await response.text()
+        except aiohttp.client_exceptions.InvalidURL:
+            return 404, 'Invalid URL'
 
-        # db_product = Product.select().where(Product.product_id == product_id).first()
-        # if not db_product:
-        #     Product.create(
-        #         title=title, product_id=product_id, price=price, link=page_url
-        #     )
-        #     Price.create(price=price, product_id=product_id)
-        #
-        # elif float(db_product.price) != price:
-        #     Price.create(price=price, product_id=product_id)
-        #     db_product.price = price
-        #     db_product.save()
+        if not page:
+            return 404, 'Page not found'
 
-        return 200, '42532705'
+        soup = BeautifulSoup(page, 'html.parser')
+
+        title = soup.find('h1', class_=self.SINGLE_PAGE_TITLE)
+        if not title:
+            return 404, 'Could not find element'
+
+        title = title.text.strip()
+        product_item = soup.find('div', class_=self.SINGLE_PAGE_PRODUCT_CLASS)
+        product_id = product_item.button['data-offer-id']
+
+        price_div = soup.find('div', class_=self.SINGLE_PAGE_PRICE_CLASS)
+        price_item = price_div.find('p', class_=self.NEW_PRICE_CLASS).get_text()
+        raw_price = price_item.strip().split()[0].replace('.', '')
+        formated_price = raw_price[:-2] + '.' + raw_price[-2:]
+        price = float(formated_price) if raw_price else 0.0
+
+        if not (product_id or title or price):
+            return 404, 'Could not find all required elements'
+
+        db_product = Product.select().where(Product.product_id == product_id).first()
+        if not db_product:
+            Product.create(
+                title=title, product_id=product_id, price=price, link=page_url
+            )
+            Price.create(price=price, product_id=product_id)
+
+        elif float(db_product.price) != price:
+            Price.create(price=price, product_id=product_id)
+            db_product.price = price
+            db_product.save()
+
+        return 200, db_product.product_id
 
     async def get_all_pages(self):
         pages = []

@@ -14,7 +14,7 @@ if __name__ == "__main__":
     alert_dispatcher = AlertDispatcher()
 
     loop.run_until_complete(scraper.work())
-    # loop.run_until_complete(alert_dispatcher.work())
+    loop.run_until_complete(alert_dispatcher.work())
 
     # loop.create_task(scraper.work())
     # loop.run_forever()

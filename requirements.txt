@@ -1,5 +1,7 @@
 beautifulsoup4
 peewee
+redis
+python-redis-cache
 aiohttp
 asyncio
 toml

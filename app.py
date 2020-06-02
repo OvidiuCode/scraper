@@ -3,7 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 import urllib.parse
 import html
 
-from models.database import MODEL_DB
+from models.database import MODEL_DB, cache
 from models.alert import Alert
 from models.product import Product
 from models.price import Price
@@ -21,6 +21,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+BEST_DEALS_TTL = 3 * 60 * 60  # 3 hours in seconds
 
 
 @app.get("/product/")
@@ -51,23 +53,24 @@ async def search_product(link: str):
     }
 
 
+@cache.cache(ttl=BEST_DEALS_TTL)
 @app.get("/deals/")
 async def get_best_deals():
     best_deals = MODEL_DB.execute_sql(
         """
         SELECT prd.title , prd.link , prd.price, 
-          (SELECT ((second_min.price - prd.price) / prd.price * 100)
+          (SELECT ((second_min.price - prd.price) / second_min.price * 100)
            FROM
              (SELECT prc2.price
               FROM prices AS prc2
               WHERE prc2.product_id = prd.product_id
               ORDER BY prc2.created_at DESC
-              OFFSET 1 LIMIT 1) AS second_min) AS price_diff
+              OFFSET 1 LIMIT 1) AS second_min) AS discount
         FROM products AS prd
         INNER JOIN prices AS prc ON (prc.product_id = prd.product_id)
         GROUP BY prd.id
         HAVING (prd.price = MIN(prc.price) and count(prc.price) > 1)
-        ORDER BY price_diff DESC
+        ORDER BY discount DESC
         LIMIT 5;
         """
     )

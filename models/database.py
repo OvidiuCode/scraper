@@ -1,4 +1,6 @@
 import peewee
+from redis import StrictRedis
+from redis_cache import RedisCache
 
 from helper import Helper
 
@@ -12,3 +14,6 @@ MODEL_DB = peewee.PostgresqlDatabase(
     password=config['password'],
     autorollback=True,
 )
+
+redis_client = StrictRedis(host="redis", decode_responses=True)
+cache = RedisCache(redis_client=redis_client)
