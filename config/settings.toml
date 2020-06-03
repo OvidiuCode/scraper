@@ -1,0 +1,15 @@
+dynaconf_merge = true
+[default.database]
+name = "ualert"
+host = "localhost"
+user = "ualert"
+password = "password"
+[default.smtp]
+host = "smtp.gmail.com"
+address = "testemail"
+password = "testpass"
+from_name = "uAlert"
+port = "587"
+[default.email]
+subject = "BOOM! Pretul a scazut!"
+message = "Salut! Alerta ta preferata e aici! Pretul pentru produsul {produs} a scazut la {pret} lei. Acceseaza rapid link-ul: {link}."
