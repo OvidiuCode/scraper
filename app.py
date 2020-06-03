@@ -12,7 +12,7 @@ from scraper import Scraper
 
 app = FastAPI()
 
-origins = ["http://localhost:8080", "http://localhost"]
+origins = ["http://localhost:8080", "http://localhost", "https://ualert.xyz"]
 
 app.add_middleware(
     CORSMiddleware,
