@@ -2,9 +2,9 @@ import peewee
 from redis import StrictRedis
 from redis_cache import RedisCache
 
-from helper import Helper
+from dynaconf import settings
 
-config = Helper.get_config()['database']
+config = settings['database']
 
 # Define async database
 MODEL_DB = peewee.PostgresqlDatabase(
