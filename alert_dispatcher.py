@@ -46,16 +46,16 @@ class AlertDispatcher(Helper):
     async def process_alert(self, alert, smtp_client):
         msg = MIMEMultipart()
 
-        message = settings['email']['message'].format(
+        message = settings.EMAIL.message.format(
             produs=alert.product_title,
             pret=float(alert.product_price),
             link=alert.product_link,
         )
 
-        from_addr = str(Header(settings['smtp']['from_name'], 'utf-8'))
-        msg['From'] = formataddr((from_addr, settings['smtp']['address']))
+        from_addr = str(Header(settings.SMTP.from_name, 'utf-8'))
+        msg['From'] = formataddr((from_addr, settings.STMP.address))
         msg['To'] = alert.email
-        msg['Subject'] = settings['email']['subject']
+        msg['Subject'] = settings.EMAIL.subject
 
         msg.attach(MIMEText(message, 'plain'))
 
