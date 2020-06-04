@@ -33,10 +33,10 @@ async def search_product(link: str):
     status_code, response = await scraper.work()
 
     if status_code != 200:
-        return {"status_code": 404, "message": response}
+        return {"status_code": status_code, "message": response}
 
     product = Product.select().where(Product.product_id == response).first()
-    prices = product.prices.order_by(Price.created_at.desc()).dicts()[:]
+    prices = product.prices.order_by(Price.created_at.asc()).dicts()[:]
 
     all_prices = [item['price'] for item in prices]
     for price in prices:

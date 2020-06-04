@@ -66,7 +66,7 @@ class Scraper:
 
         title = soup.find('h1', class_=self.SINGLE_PAGE_TITLE)
         if not title:
-            return 404, 'Could not find element'
+            return 422, page_url
 
         title = title.text.strip()
         product_item = soup.find('div', class_=self.SINGLE_PAGE_PRODUCT_CLASS)
