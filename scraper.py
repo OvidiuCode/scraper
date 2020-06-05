@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 from models.product import Product
 from models.price import Price
 
+from config import emag_headers
+
 
 class Scraper:
 
@@ -200,6 +202,9 @@ class Scraper:
 
     async def get_session(self):
         if not self._session:
-            self._session = aiohttp.ClientSession()
+            self._session = aiohttp.ClientSession(
+                cookies=emag_headers.cookies,
+                headers=emag_headers.headers,
+            )
 
         return self._session
