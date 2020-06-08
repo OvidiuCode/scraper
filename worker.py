@@ -1,8 +1,8 @@
 import asyncio
 import uvloop
 
-from scraper import Scraper
-from alert_dispatcher import AlertDispatcher
+from workers.scraper import Scraper
+from workers.alert_dispatcher import AlertDispatcher
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
@@ -13,8 +13,6 @@ if __name__ == "__main__":
     scraper = Scraper()
     alert_dispatcher = AlertDispatcher()
 
-    loop.run_until_complete(scraper.work())
-    loop.run_until_complete(alert_dispatcher.work())
-
-    # loop.create_task(scraper.work())
-    # loop.run_forever()
+    loop.create_task(scraper.work())
+    loop.create_task(alert_dispatcher.work())
+    loop.run_forever()

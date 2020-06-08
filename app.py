@@ -8,7 +8,7 @@ from models.alert import Alert
 from models.product import Product
 from models.price import Price
 
-from scraper import Scraper
+from workers.scraper import Scraper
 
 app = FastAPI()
 
