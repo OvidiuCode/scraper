@@ -49,7 +49,7 @@ class Scraper:
 
         await self.insert_items()
 
-        # await asyncio.sleep(wait)
+        # await asyncio.sleep(24 * 60 * 60)
 
     async def scrape_custom_page(self, page_url):
         session = await self.get_session()
@@ -58,7 +58,10 @@ class Scraper:
                 if response.status == 404:
                     return 404, 'Invalid URL'
                 page = await response.text()
-        except aiohttp.client_exceptions.InvalidURL:
+        except (
+            aiohttp.client_exceptions.InvalidURL,
+            aiohttp.client_exceptions.ClientConnectorError,
+        ):
             return 404, 'Invalid URL'
 
         if not page:
@@ -203,8 +206,7 @@ class Scraper:
     async def get_session(self):
         if not self._session:
             self._session = aiohttp.ClientSession(
-                cookies=emag_headers.cookies,
-                headers=emag_headers.headers,
+                cookies=emag_headers.cookies, headers=emag_headers.headers,
             )
 
         return self._session
