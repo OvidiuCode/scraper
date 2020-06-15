@@ -24,6 +24,9 @@ class Scraper:
     SINGLE_PAGE_PRODUCT_CLASS = (
         'product-highlight product-page-actions js-product-page-actions'
     )
+    ADD_TO_FAVORITE_BUTTON_CLASS = (
+        'add-to-favorites btn btn-xl btn-default btn-icon btn-block gtm_t95ovv'
+    )
 
     def __init__(self, custom_page=None):
         self._session = None
@@ -75,6 +78,11 @@ class Scraper:
 
         title = title.text.strip()
         product_item = soup.find('div', class_=self.SINGLE_PAGE_PRODUCT_CLASS)
+        if not product_item:
+            button = soup.find('button', class_=self.ADD_TO_FAVORITE_BUTTON_CLASS)
+            product_id = button['data-offerid']
+            return 200, product_id
+
         product_id = product_item.button['data-offer-id']
 
         price_div = soup.find('div', class_=self.SINGLE_PAGE_PRICE_CLASS)
@@ -144,7 +152,6 @@ class Scraper:
                 db_product.save()
 
     async def get_page_items(self, url):
-        # page = requests.get(url)
         session = await self.get_session()
         async with session.get(url) as response:
             page = await response.text()
