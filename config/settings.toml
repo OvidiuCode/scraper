@@ -3,13 +3,13 @@ dynaconf_merge = true
 [default.database]
 name = "ualert"
 host = "localhost"
-user = "ualert"
+user = "ovidiu"
 password = "password"
 
 [default.smtp]
-host = "smtp.gmail.com"
-address = "testemail"
-password = "testpass"
+host = "smtp.sendgrid.net"
+address = "apikey"
+password = "random"
 from_name = "uAlert"
 port = "587"
 

@@ -52,6 +52,7 @@ class AlertDispatcher(Helper):
             link=alert.product_link,
         )
 
+        print(settings)
         from_addr = str(Header(settings.SMTP.from_name, 'utf-8'))
         msg['From'] = formataddr((from_addr, settings.STMP.address))
         msg['To'] = alert.email
