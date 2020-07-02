@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.header import Header
-from email.utils import formataddr
 
+import logging
+import sendgrid
+from sendgrid.helpers import mail
 from models.alert import Alert
 from models.product import Product
 
@@ -35,29 +34,38 @@ class AlertDispatcher(Helper):
         )
 
         alert_ids = []
-        with self.smtp_client() as smtp_client:
-            for alert in alerts:
-                alert_ids.append(alert.id)
-                await self.process_alert(alert, smtp_client)
+        for alert in alerts:
+            alert_ids.append(alert.id)
+            await self.process_alert(alert)
 
         if alert_ids:
             Alert.update(satisfied=True).where(Alert.id.in_(alert_ids)).execute()
 
-    async def process_alert(self, alert, smtp_client):
-        msg = MIMEMultipart()
-
+    async def process_alert(self, alert):
         message = settings.EMAIL.message.format(
             produs=alert.product_title,
             pret=float(alert.product_price),
             link=alert.product_link,
         )
 
-        from_addr = str(Header(settings.SMTP.from_name, 'utf-8'))
-        msg['From'] = formataddr((from_addr, settings.STMP.address))
-        msg['To'] = alert.email
-        msg['Subject'] = settings.EMAIL.subject
+        sg = sendgrid.SendGridAPIClient(settings.SMTP.password)
+        sgmail = mail.Mail(
+            from_email=mail.Email(
+                email=settings.SMTP.address, name=settings.SMTP.from_name
+            ),
+            to_emails=alert.email,
+            subject=settings.EMAIL.subject,
+            html_content=message,
+        )
 
-        msg.attach(MIMEText(message, 'plain'))
-
-        smtp_client.send_message(msg)
-        del msg
+        try:
+            response = sg.send(sgmail)
+        except Exception as exc:
+            logging.exception(exc)
+            if getattr(exc, "read", None):
+                logging.error(exc.read())
+            if getattr(exc, "body", None):
+                logging.error(exc.body)
+        else:
+            if response.status_code != 202:
+                raise Exception(f"An error occurred: {response.body}")

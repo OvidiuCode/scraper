@@ -3,16 +3,17 @@ dynaconf_merge = true
 [default.database]
 name = "ualert"
 host = "localhost"
-user = "ualert"
+user = "ovidiu"
 password = "password"
 
 [default.smtp]
-host = "smtp.gmail.com"
-address = "testemail"
-password = "testpass"
-from_name = "uAlert"
+host = "smtp.sendgrid.net"
+username = "apikey"
+address = "delivery@mail.darkwoods.win"
+password = "random"
+client_name = "uAlert"
 port = "587"
 
 [default.email]
 subject = "BOOM! Pretul a scazut!"
-message = "Salut! Alerta ta preferata e aici! Pretul pentru produsul {produs} a scazut la {pret} lei. Acceseaza rapid link-ul: {link}."
+message = '<html> <head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1"> </head> <body> <h1>uAlert</h1> <p>Salut! Alerta ta preferata e aici! </p> <p>Pretul pentru produsul <b>{produs}</b> a scazut la <b style="color: #DE2C2C">{pret}</b> lei.</p> <p>Acceseaza rapid link-ul: <a href="{link}">{produs}</a></p> </body> </html>'

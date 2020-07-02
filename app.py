@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import FastAPI, Form, Header
 from starlette.middleware.cors import CORSMiddleware
 import urllib.parse
@@ -9,6 +10,7 @@ from models.product import Product
 from models.price import Price
 
 from workers.scraper import Scraper
+from workers.alert_dispatcher import AlertDispatcher
 
 app = FastAPI()
 
@@ -105,5 +107,9 @@ async def add_alert(
     Alert.get_or_create(
         product_id=message, link=decoded_link, email=email, price=price, satisfied=False
     )
+
+    alert_dispatcher = AlertDispatcher()
+    loop = asyncio.get_event_loop()
+    loop.create_task(alert_dispatcher.work())
 
     return {"status_code": 200, "message": "Alert created!"}

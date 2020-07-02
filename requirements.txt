@@ -13,3 +13,4 @@ uvloop
 requests
 python-multipart
 dynaconf
+sendgrid
