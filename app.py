@@ -108,6 +108,8 @@ async def add_alert(
         product_id=message, link=decoded_link, email=email, price=price, satisfied=False
     )
 
-    asyncio.create_task(AlertDispatcher().work())
+    alert_dispatcher = AlertDispatcher()
+    loop = asyncio.get_event_loop()
+    loop.create_task(alert_dispatcher.work())
 
     return {"status_code": 200, "message": "Alert created!"}
